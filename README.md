@@ -72,17 +72,20 @@ Speckstein hat eine spezifische Wärmekapazität von $c \approx 0{,}98\text{ kJ}
 Bei einer Ofenmasse von **1.000 kg**:
 $$Q = 1000\text{ kg} \times 0{,}0002722 \times (T_{\text{Stein}} - T_{\text{Raum}})$$
 
-- **Beispiel:**  
-  Raumtemperatur = 20 °C  
-  Speckstein maximal erhitzt = 70 °C ($\Delta T = 50\text{ K}$)  
-  $$\text{Gespeicherte Energie} = 1000 \times 0{,}0002722 \times 50 \approx \mathbf{13{,}6\text{ kWh}}$$
+- **Beispiel 1 (1.000 kg Ofen):**  
+  $\Delta T = 50\text{ K}$ (von 20 °C auf 70 °C)  
+  $$Q = 1000 \times 0{,}0002722 \times 50 \approx \mathbf{13{,}6\text{ kWh}}$$
+- **Beispiel 2 (großer 2.600 kg Speicherofen):**  
+  $\Delta T = 50\text{ K}$ (von 20 °C auf 70 °C)  
+  $$Q = 2600 \times 0{,}0002722 \times 50 \approx \mathbf{35{,}4\text{ kWh}}$$
 
 ---
 
-## ⚙️ Selbstlernende Kalibrierung & Anpassung
+## ⚙️ Ofen-Konfiguration im Dashboard (Gewicht & Lernmodus)
 
-Über die Dashboard-Karten kannst du jederzeit folgende Parameter anpassen:
-- **Speichermasse (kg):** Voreingestellt auf 1.000 kg.
+Direkt auf der Dashboard-Karte oder über Home Assistant Entitäten kannst du folgende Parameter ganz einfach per Eingabefeld einstellen:
+- **Speichermasse (kg):** Flexibel von **200 kg bis 5.000 kg** (z.B. `1000` oder `2600` eintippen).
+  - *Die Berechnung der gespeicherten kWh, der maximalen Kapazität und der Abkühlzeit passt sich automatisch an das eingegebene Gewicht an!*
 - **Raumtemperatur (0% Grenze):** Standard 20 °C.
 - **100% Temperatur-Grenze (Gelernt):** Standard 70 °C.
-- **Automatisches Anlernen (Schalter):** Ist dieser Schalter aktiv, registriert eine Automation automatisch neue Temperaturrekorde deines Specksteins und passt die 100%-Marke nach oben an.
+- **Automatisches Anlernen (Schalter):** Registriert nach dem ersten Vollbrand automatisch den Höchstwert deines Ofens und passt die 100%-Marke an.

@@ -10,9 +10,10 @@ input_number:
   speckstein_masse:
     name: "Speichermasse des Ofens"
     min: 200
-    max: 3000
-    step: 50
+    max: 5000
+    step: 25
     initial: 1000
+    mode: box
     unit_of_measurement: "kg"
     icon: "mdi:weight-kilogram"
 
@@ -85,6 +86,21 @@ template:
           {% set kwh = masse * 0.0002722 * delta_t %}
           {{ kwh | round(1) }}
 
+      # Maximale Speicherkapazität des Ofens bei 100% Ladung in kWh
+      - name: "Speckstein Max. Speicherkapazität"
+        unique_id: speckstein_max_kapazitaet_kwh
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        icon: "mdi:battery-high"
+        state: >
+          {% set t_min = states('input_number.speckstein_min_temp') | float(20) %}
+          {% set t_max = states('input_number.speckstein_max_temp') | float(70) %}
+          {% set masse = states('input_number.speckstein_masse') | float(1000) %}
+          {% set delta_max = [0, t_max - t_min] | max %}
+          {% set max_kwh = masse * 0.0002722 * delta_max %}
+          {{ max_kwh | round(1) }}
+
       # Automatische Zustandserkennung des Ofens
       - name: "Speckstein Ofen-Status"
         unique_id: speckstein_ofen_betriebsstatus
@@ -114,7 +130,8 @@ template:
           {% endif %}
 
       # Geschätzte verbleibende Wärmeabgabedauer in Stunden
-      # Ein 1000kg Specksteinofen kühlt im Schnitt mit ca. 2.2 °C pro Stunde ab
+      # Kühldauer skaliert physikalisch mit der Speichermasse:
+      # Ein 1000kg Ofen kühlt mit ca. 2.2 °C/h ab, ein schwerer 2600kg Ofen kühlt viel langsamer ab (ca. 0.85 °C/h)!
       - name: "Speckstein Restwärmedauer"
         unique_id: speckstein_restwaerme_stunden
         unit_of_measurement: "h"
@@ -122,8 +139,10 @@ template:
         state: >
           {% set t_stein = states('sensor.tulikivi_specksteinofen_speckstein_temperatur') | float(20) %}
           {% set t_min = states('input_number.speckstein_min_temp') | float(20) %}
+          {% set masse = states('input_number.speckstein_masse') | float(1000) %}
           {% set delta_t = [0, t_stein - t_min] | max %}
-          {% set stunden = delta_t / 2.2 %}
+          {% set abkuehlrate = 2.2 * (1000.0 / ([200, masse] | max)) %}
+          {% set stunden = delta_t / abkuehlrate %}
           {{ stunden | round(1) }}
 
 # ------------------------------------------------------------------------------

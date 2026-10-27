@@ -5,7 +5,7 @@
 # ==============================================================================
 
 type: vertical-stack
-title: "🪵 Tulikivi Specksteinofen (1.000 kg)"
+title: "🪵 Tulikivi Specksteinofen"
 cards:
   # 1. Großer Status-Header
   - type: entity
@@ -34,24 +34,27 @@ cards:
         unit: "kWh"
         needle: true
         min: 0
-        max: 16
+        max: 50
         severity:
-          green: 7
-          yellow: 3
-          red: 12
+          green: 15
+          yellow: 8
+          red: 35
 
-  # 3. Die beiden Live-Temperaturen im Vergleich
+  # 3. Live-Temperaturen & Leistungswerte
   - type: glance
-    title: "Live-Temperaturen"
+    title: "Live-Messwerte & Kapazität"
     show_state: true
     show_name: true
     entities:
       - entity: sensor.tulikivi_specksteinofen_rauchrohr_temperatur
-        name: "Rauchrohr (Echtzeit)"
+        name: "Rauchrohr"
         icon: mdi:fire
       - entity: sensor.tulikivi_specksteinofen_speckstein_temperatur
-        name: "Speckstein (Speicher)"
+        name: "Speckstein"
         icon: mdi:radiator
+      - entity: sensor.speckstein_max_kapazitaet_kwh
+        name: "Max. Kapazität"
+        icon: mdi:battery-high
       - entity: sensor.speckstein_restwaerme_stunden
         name: "Restwärme ca."
         icon: mdi:timer-sand
@@ -67,13 +70,13 @@ cards:
       - entity: sensor.tulikivi_specksteinofen_speckstein_temperatur
         name: "Speckstein Außen"
 
-  # 5. Einstellungen & Lern-Modus (Aufklappbar oder als Entities)
+  # 5. Ofen-Konfiguration (Hier Gewicht wie 1000kg oder 2600kg einstellen!)
   - type: entities
-    title: "Speicherofen Parameter & Kalibrierung"
+    title: "⚙️ Ofen-Konfiguration & Parameter"
     show_header_toggle: false
     entities:
       - entity: input_number.speckstein_masse
-        name: "Ofenmasse"
+        name: "Ofen-Gewicht (z.B. 1000 oder 2600 kg)"
       - entity: input_number.speckstein_max_temp
         name: "100% Temperatur-Grenze (Gelernt)"
       - entity: input_number.speckstein_min_temp
