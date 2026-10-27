@@ -45,8 +45,27 @@ Verwendet wird ein **ESP32 DevKitC V4** mit **zwei MAX6675-Modulen**:
 
 ---
 
-### Schritt 2: Home Assistant Package aktivieren
-Das mitgelieferte Package bündelt alle mathematischen Berechnungen, Sensoren, Schalter und Automationen in einer Datei.
+### Schritt 2: Installation in Home Assistant
+
+#### Option A: Über HACS (Empfohlen)
+Da diese Integration als HACS-fähige Custom Integration aufgebaut ist, kannst du sie direkt über HACS hinzufügen:
+
+1. Öffne in Home Assistant **HACS**.
+2. Klicke oben rechts auf die **drei Punkte** (Menü) ➔ **Benutzerdefinierte Repositories** (*Custom repositories*).
+3. Trage folgende Daten ein:
+   - **Repository:** `https://github.com/romanmartens86/Tulikivi_Specksteinofen`
+   - **Typ / Kategorie:** `Integration`
+4. Klicke auf **Hinzufügen**.
+5. Suche nach **Tulikivi Specksteinofen**, klicke auf **Herunterladen** und starte Home Assistant neu.
+6. Gehe in Home Assistant auf **Einstellungen ➔ Geräte & Dienste ➔ Integration hinzufügen** und wähle **„Tulikivi Specksteinofen“**.
+   - Dort öffnet sich ein Einrichtungsassistent: Du wählst einfach deine beiden Sensoren aus und gibst das Gewicht (z.B. `1000` oder `2600` kg) ein!
+
+*(Hinweis: Damit HACS ohne GitHub-Token darauf zugreifen kann, muss das GitHub-Repository öffentlich (public) sein. Alternativ kann man den Ordner `custom_components/tulikivi_specksteinofen` einfach manuell in den `config/`-Ordner kopieren).*
+
+---
+
+#### Option B: Manuell über Package (Alternative ohne HACS)
+Das mitgelieferte YAML-Package bündelt alle mathematischen Berechnungen, Sensoren, Schalter und Automationen in einer Datei.
 
 1. Stelle sicher, dass in deiner Home Assistant `configuration.yaml` Packages aktiviert sind:
    ```yaml

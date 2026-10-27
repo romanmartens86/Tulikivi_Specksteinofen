@@ -1,0 +1,10 @@
+{
+  "domain": "tulikivi_specksteinofen",
+  "name": "Tulikivi Specksteinofen",
+  "version": "1.0.0",
+  "documentation": "https://github.com/romanmartens86/Tulikivi_Specksteinofen",
+  "issue_tracker": "https://github.com/romanmartens86/Tulikivi_Specksteinofen/issues",
+  "codeowners": ["@romanmartens86"],
+  "config_flow": true,
+  "iot_class": "calculated"
+}

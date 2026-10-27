@@ -1,0 +1,33 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configure Tulikivi Soapstone Stove",
+        "description": "Select temperature sensors and enter the thermal mass of your soapstone stove.",
+        "data": {
+          "name": "Stove Name",
+          "flue_sensor": "Flue Pipe Temperature Sensor (Fast)",
+          "stone_sensor": "Soapstone Surface Temperature Sensor (Storage)",
+          "mass": "Thermal mass of the stove in kg (e.g. 1000 or 2600)",
+          "room_temp": "Base room temperature for 0% charge (°C)",
+          "max_temp": "Max temperature for 100% charge (°C)",
+          "auto_learn": "Automatically learn new peak temperature"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Adjust Tulikivi Parameters",
+        "description": "Adjust stove mass or temperature boundaries.",
+        "data": {
+          "mass": "Thermal mass of the stove in kg",
+          "room_temp": "Base room temperature (°C)",
+          "max_temp": "Max temperature for 100% (°C)",
+          "auto_learn": "Automatically learn peak temperature"
+        }
+      }
+    }
+  }
+}
