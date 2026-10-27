@@ -77,9 +77,11 @@ cards:
     entities:
       - entity: input_number.speckstein_masse
         name: "Ofen-Gewicht (z.B. 1000 oder 2600 kg)"
+      - entity: input_text.speckstein_raum_sensor_entity
+        name: "Raumtemperatur Sensor-Entität (z.B. sensor.wohnzimmer_temperatur)"
+      - entity: input_number.speckstein_min_temp
+        name: "Feste Basis-Raumtemperatur (Fallback)"
       - entity: input_number.speckstein_max_temp
         name: "100% Temperatur-Grenze (Gelernt)"
-      - entity: input_number.speckstein_min_temp
-        name: "Raumtemperatur (0% Grenze)"
       - entity: input_boolean.speckstein_auto_learn
         name: "Höchstwert automatisch anlernen"

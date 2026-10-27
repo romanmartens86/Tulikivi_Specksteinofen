@@ -18,6 +18,7 @@ from .const import (
     DOMAIN,
     CONF_FLUE_SENSOR,
     CONF_STONE_SENSOR,
+    CONF_ROOM_SENSOR,
     CONF_MASS,
     CONF_ROOM_TEMP,
     CONF_MAX_TEMP,
@@ -42,6 +43,7 @@ async def async_setup_entry(
 
     flue_sensor_id = data.get(CONF_FLUE_SENSOR)
     stone_sensor_id = data.get(CONF_STONE_SENSOR)
+    room_sensor_id = data.get(CONF_ROOM_SENSOR)
     name = data.get("name", DEFAULT_NAME)
 
     coordinator = TulikiviDataCoordinator(hass, entry)
@@ -55,11 +57,12 @@ async def async_setup_entry(
     ]
 
     async_add_entities(entities)
-    await coordinator.async_setup([flue_sensor_id, stone_sensor_id])
+    sensors_to_track = [sid for sid in (flue_sensor_id, stone_sensor_id, room_sensor_id) if sid]
+    await coordinator.async_setup(sensors_to_track)
 
 
 class TulikiviDataCoordinator:
-    """Coordinates reading state changes from the flue and stone sensors."""
+    """Coordinates reading state changes from the flue, stone, and room sensors."""
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         self.hass = hass
@@ -67,6 +70,7 @@ class TulikiviDataCoordinator:
         self.listeners = []
         self.flue_temp = 20.0
         self.stone_temp = 20.0
+        self.live_room_temp: float | None = None
 
     @property
     def mass(self) -> float:
@@ -74,6 +78,8 @@ class TulikiviDataCoordinator:
 
     @property
     def room_temp(self) -> float:
+        if self.live_room_temp is not None:
+            return self.live_room_temp
         return float(self.entry.data.get(CONF_ROOM_TEMP, DEFAULT_ROOM_TEMP))
 
     @property
@@ -100,6 +106,8 @@ class TulikiviDataCoordinator:
                 elif entity_id == self.entry.data.get(CONF_STONE_SENSOR):
                     self.stone_temp = val
                     self._check_auto_learn(val)
+                elif entity_id == self.entry.data.get(CONF_ROOM_SENSOR):
+                    self.live_room_temp = val
 
                 self._notify_listeners()
             except ValueError:
@@ -115,6 +123,8 @@ class TulikiviDataCoordinator:
                         self.flue_temp = val
                     elif sid == self.entry.data.get(CONF_STONE_SENSOR):
                         self.stone_temp = val
+                    elif sid == self.entry.data.get(CONF_ROOM_SENSOR):
+                        self.live_room_temp = val
                 except ValueError:
                     pass
 

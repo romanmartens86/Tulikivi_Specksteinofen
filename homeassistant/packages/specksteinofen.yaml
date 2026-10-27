@@ -27,13 +27,19 @@ input_number:
     icon: "mdi:thermometer-high"
 
   speckstein_min_temp:
-    name: "Basis-Raumtemperatur (0%)"
+    name: "Feste Basis-Raumtemperatur (0% Grenze)"
     min: 15
     max: 30
     step: 1
     initial: 20
     unit_of_measurement: "°C"
     icon: "mdi:thermometer-low"
+
+input_text:
+  speckstein_raum_sensor_entity:
+    name: "Raumtemperatur Sensor-Entität (optional)"
+    initial: ""
+    icon: "mdi:home-thermometer-outline"
 
 input_boolean:
   speckstein_auto_learn:
@@ -61,7 +67,12 @@ template:
           {% endif %}
         state: >
           {% set t_stein = states('sensor.tulikivi_specksteinofen_speckstein_temperatur') | float(20) %}
-          {% set t_min = states('input_number.speckstein_min_temp') | float(20) %}
+          {% set r_ent = states('input_text.speckstein_raum_sensor_entity') %}
+          {% if r_ent and states(r_ent) not in ['unknown', 'unavailable', ''] %}
+            {% set t_min = states(r_ent) | float(20) %}
+          {% else %}
+            {% set t_min = states('input_number.speckstein_min_temp') | float(20) %}
+          {% endif %}
           {% set t_max = states('input_number.speckstein_max_temp') | float(70) %}
           {% if t_max > t_min %}
             {% set pct = ((t_stein - t_min) / (t_max - t_min)) * 100 %}
@@ -80,7 +91,12 @@ template:
         icon: "mdi:fire-circle"
         state: >
           {% set t_stein = states('sensor.tulikivi_specksteinofen_speckstein_temperatur') | float(20) %}
-          {% set t_min = states('input_number.speckstein_min_temp') | float(20) %}
+          {% set r_ent = states('input_text.speckstein_raum_sensor_entity') %}
+          {% if r_ent and states(r_ent) not in ['unknown', 'unavailable', ''] %}
+            {% set t_min = states(r_ent) | float(20) %}
+          {% else %}
+            {% set t_min = states('input_number.speckstein_min_temp') | float(20) %}
+          {% endif %}
           {% set masse = states('input_number.speckstein_masse') | float(1000) %}
           {% set delta_t = [0, t_stein - t_min] | max %}
           {% set kwh = masse * 0.0002722 * delta_t %}
@@ -94,7 +110,12 @@ template:
         state_class: measurement
         icon: "mdi:battery-high"
         state: >
-          {% set t_min = states('input_number.speckstein_min_temp') | float(20) %}
+          {% set r_ent = states('input_text.speckstein_raum_sensor_entity') %}
+          {% if r_ent and states(r_ent) not in ['unknown', 'unavailable', ''] %}
+            {% set t_min = states(r_ent) | float(20) %}
+          {% else %}
+            {% set t_min = states('input_number.speckstein_min_temp') | float(20) %}
+          {% endif %}
           {% set t_max = states('input_number.speckstein_max_temp') | float(70) %}
           {% set masse = states('input_number.speckstein_masse') | float(1000) %}
           {% set delta_max = [0, t_max - t_min] | max %}
@@ -115,7 +136,12 @@ template:
         state: >
           {% set t_rauch = states('sensor.tulikivi_specksteinofen_rauchrohr_temperatur') | float(0) %}
           {% set t_stein = states('sensor.tulikivi_specksteinofen_speckstein_temperatur') | float(20) %}
-          {% set t_min = states('input_number.speckstein_min_temp') | float(20) %}
+          {% set r_ent = states('input_text.speckstein_raum_sensor_entity') %}
+          {% if r_ent and states(r_ent) not in ['unknown', 'unavailable', ''] %}
+            {% set t_min = states(r_ent) | float(20) %}
+          {% else %}
+            {% set t_min = states('input_number.speckstein_min_temp') | float(20) %}
+          {% endif %}
           
           {% if t_rauch >= 170 %}
             Voller Abbrand
@@ -138,7 +164,12 @@ template:
         icon: "mdi:timer-sand"
         state: >
           {% set t_stein = states('sensor.tulikivi_specksteinofen_speckstein_temperatur') | float(20) %}
-          {% set t_min = states('input_number.speckstein_min_temp') | float(20) %}
+          {% set r_ent = states('input_text.speckstein_raum_sensor_entity') %}
+          {% if r_ent and states(r_ent) not in ['unknown', 'unavailable', ''] %}
+            {% set t_min = states(r_ent) | float(20) %}
+          {% else %}
+            {% set t_min = states('input_number.speckstein_min_temp') | float(20) %}
+          {% endif %}
           {% set masse = states('input_number.speckstein_masse') | float(1000) %}
           {% set delta_t = [0, t_stein - t_min] | max %}
           {% set abkuehlrate = 2.2 * (1000.0 / ([200, masse] | max)) %}

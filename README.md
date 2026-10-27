@@ -103,8 +103,9 @@ $$Q = 1000\text{ kg} \times 0{,}0002722 \times (T_{\text{Stein}} - T_{\text{Raum
 ## ⚙️ Ofen-Konfiguration im Dashboard (Gewicht & Lernmodus)
 
 Direkt auf der Dashboard-Karte oder über Home Assistant Entitäten kannst du folgende Parameter ganz einfach per Eingabefeld einstellen:
-- **Speichermasse (kg):** Flexibel von **200 kg bis 5.000 kg** (z.B. `1000` oder `2600` eintippen).
+- **Speichermasse (kg):** Flexibel von **200 kg bis 6.000 kg** (z.B. `1000` oder `2600` kg).
   - *Die Berechnung der gespeicherten kWh, der maximalen Kapazität und der Abkühlzeit passt sich automatisch an das eingegebene Gewicht an!*
-- **Raumtemperatur (0% Grenze):** Standard 20 °C.
-- **100% Temperatur-Grenze (Gelernt):** Standard 70 °C.
+- **Raumtemperatur-Sensor (Entität):** Optional kannst du direkt deinen bestehenden Raumtemperatur-Sensor (z.B. `sensor.wohnzimmer_temperatur`) auswählen – die Energie- und Ladeberechnung nutzt dann automatisch deine echte Live-Raumtemperatur!
+- **Basis-Raumtemperatur (Fallback):** Fester Standardwert (z.B. 20 °C), falls kein Sensor gewählt ist.
+- **100% Temperatur-Grenze (Gelernt):** Standard 70 °C (wird automatisch angepasst).
 - **Automatisches Anlernen (Schalter):** Registriert nach dem ersten Vollbrand automatisch den Höchstwert deines Ofens und passt die 100%-Marke an.

@@ -4,6 +4,7 @@ DOMAIN = "tulikivi_specksteinofen"
 
 CONF_FLUE_SENSOR = "flue_sensor"
 CONF_STONE_SENSOR = "stone_sensor"
+CONF_ROOM_SENSOR = "room_sensor"
 CONF_MASS = "mass"
 CONF_ROOM_TEMP = "room_temp"
 CONF_MAX_TEMP = "max_temp"

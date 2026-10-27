@@ -8,8 +8,9 @@
           "name": "Name des Ofens",
           "flue_sensor": "Rauchrohr-Temperatursensor (schnell)",
           "stone_sensor": "Speckstein-Temperatursensor (Speicher)",
+          "room_sensor": "Raumtemperatur-Sensor (optional, Entität)",
           "mass": "Speichermasse des Ofens in kg (z.B. 1000 oder 2600)",
-          "room_temp": "Basis-Raumtemperatur für 0% Ladung (°C)",
+          "room_temp": "Feste Basis-Raumtemperatur (°C, wenn kein Sensor gewählt)",
           "max_temp": "Maximaltemperatur für 100% Ladung (°C)",
           "auto_learn": "Maximaltemperatur automatisch bei neuen Rekorden anlernen"
         }
@@ -20,10 +21,11 @@
     "step": {
       "init": {
         "title": "Tulikivi Parameter anpassen",
-        "description": "Passe Ofengewicht oder Temperaturgrenzen an.",
+        "description": "Passe Sensoren, Ofengewicht oder Temperaturgrenzen an.",
         "data": {
+          "room_sensor": "Raumtemperatur-Sensor (optional, Entität)",
           "mass": "Speichermasse des Ofens in kg",
-          "room_temp": "Basis-Raumtemperatur (°C)",
+          "room_temp": "Feste Basis-Raumtemperatur (°C, wenn kein Sensor gewählt)",
           "max_temp": "Maximaltemperatur für 100% (°C)",
           "auto_learn": "Höchstwert automatisch anlernen"
         }

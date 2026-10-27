@@ -11,6 +11,7 @@ from .const import (
     DOMAIN,
     CONF_FLUE_SENSOR,
     CONF_STONE_SENSOR,
+    CONF_ROOM_SENSOR,
     CONF_MASS,
     CONF_ROOM_TEMP,
     CONF_MAX_TEMP,
@@ -46,12 +47,15 @@ class TulikiviConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_STONE_SENSOR): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="sensor")
                 ),
+                vol.Optional(CONF_ROOM_SENSOR): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain="sensor")
+                ),
                 vol.Required(CONF_MASS, default=DEFAULT_MASS): selector.NumberSelector(
                     selector.NumberSelectorConfig(
                         min=100, max=6000, step=25, unit_of_measurement="kg", mode=selector.NumberSelectorMode.BOX
                     )
                 ),
-                vol.Required(CONF_ROOM_TEMP, default=DEFAULT_ROOM_TEMP): selector.NumberSelector(
+                vol.Optional(CONF_ROOM_TEMP, default=DEFAULT_ROOM_TEMP): selector.NumberSelector(
                     selector.NumberSelectorConfig(
                         min=10, max=30, step=0.5, unit_of_measurement="°C", mode=selector.NumberSelectorMode.BOX
                     )
@@ -91,25 +95,29 @@ class TulikiviOptionsFlowHandler(config_entries.OptionsFlow):
 
         current = self.config_entry.data
 
-        schema = vol.Schema(
-            {
-                vol.Required(CONF_MASS, default=current.get(CONF_MASS, DEFAULT_MASS)): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=100, max=6000, step=25, unit_of_measurement="kg", mode=selector.NumberSelectorMode.BOX
-                    )
-                ),
-                vol.Required(CONF_ROOM_TEMP, default=current.get(CONF_ROOM_TEMP, DEFAULT_ROOM_TEMP)): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=10, max=30, step=0.5, unit_of_measurement="°C", mode=selector.NumberSelectorMode.BOX
-                    )
-                ),
-                vol.Required(CONF_MAX_TEMP, default=current.get(CONF_MAX_TEMP, DEFAULT_MAX_TEMP)): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=40, max=120, step=1, unit_of_measurement="°C", mode=selector.NumberSelectorMode.BOX
-                    )
-                ),
-                vol.Required(CONF_AUTO_LEARN, default=current.get(CONF_AUTO_LEARN, DEFAULT_AUTO_LEARN)): selector.BooleanSelector(),
-            }
-        )
+        options_schema = {
+            vol.Optional(
+                CONF_ROOM_SENSOR,
+                description={"suggested_value": current.get(CONF_ROOM_SENSOR)},
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="sensor")
+            ),
+            vol.Required(CONF_MASS, default=current.get(CONF_MASS, DEFAULT_MASS)): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=100, max=6000, step=25, unit_of_measurement="kg", mode=selector.NumberSelectorMode.BOX
+                )
+            ),
+            vol.Required(CONF_ROOM_TEMP, default=current.get(CONF_ROOM_TEMP, DEFAULT_ROOM_TEMP)): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=10, max=30, step=0.5, unit_of_measurement="°C", mode=selector.NumberSelectorMode.BOX
+                )
+            ),
+            vol.Required(CONF_MAX_TEMP, default=current.get(CONF_MAX_TEMP, DEFAULT_MAX_TEMP)): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=40, max=120, step=1, unit_of_measurement="°C", mode=selector.NumberSelectorMode.BOX
+                )
+            ),
+            vol.Required(CONF_AUTO_LEARN, default=current.get(CONF_AUTO_LEARN, DEFAULT_AUTO_LEARN)): selector.BooleanSelector(),
+        }
 
-        return self.async_show_form(step_id="init", data_schema=schema)
+        return self.async_show_form(step_id="init", data_schema=vol.Schema(options_schema))
