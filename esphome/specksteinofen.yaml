@@ -1,0 +1,74 @@
+substitutions:
+  name: "tulikivi-ofen"
+  friendly_name: "Tulikivi Specksteinofen"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Native Home Assistant API für automatische Erkennung
+api:
+
+# Kabellose Updates über WLAN
+ota:
+  platform: esphome
+
+# WLAN-Konfiguration
+wifi:
+  ssid: "!secret wifi_ssid"
+  password: "!secret wifi_password"
+
+  # Notfall-Hotspot falls WLAN nicht erreichbar ist
+  ap:
+    ssid: "Tulikivi-Ofen-Fallback"
+    password: "fallbackpassword"
+
+captive_portal:
+
+# Logger für Fehlerdiagnose
+logger:
+  level: INFO
+
+# Status-LED auf dem ESP32 DevKitC V4 (blaue LED auf GPIO 2)
+status_led:
+  pin: GPIO2
+
+# Hardware SPI Bus für die MAX6675 Sensoren
+spi:
+  clk_pin: GPIO18
+  miso_pin: GPIO19
+
+# Sensoren: 2x MAX6675 Thermoelemente
+sensor:
+  - platform: max6675
+    name: "Rauchrohr Temperatur"
+    id: rauchrohr_temp
+    cs_pin: GPIO5
+    update_interval: 2s
+    unit_of_measurement: "°C"
+    accuracy_decimals: 0
+    device_class: "temperature"
+    state_class: "measurement"
+    icon: "mdi:fire"
+    filters:
+      - filter_out: nan
+      - round: 0
+
+  - platform: max6675
+    name: "Speckstein Temperatur"
+    id: speckstein_temp
+    cs_pin: GPIO4
+    update_interval: 2s
+    unit_of_measurement: "°C"
+    accuracy_decimals: 0
+    device_class: "temperature"
+    state_class: "measurement"
+    icon: "mdi:radiator"
+    filters:
+      - filter_out: nan
+      - round: 0

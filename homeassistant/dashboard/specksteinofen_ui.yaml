@@ -1,0 +1,82 @@
+# ==============================================================================
+# Lovelace Dashboard: Tulikivi Specksteinofen
+# Du kannst diesen YAML-Block direkt als Ansicht (View) oder als vertikalen Stapel
+# in dein Home Assistant Dashboard einfügen.
+# ==============================================================================
+
+type: vertical-stack
+title: "🪵 Tulikivi Specksteinofen (1.000 kg)"
+cards:
+  # 1. Großer Status-Header
+  - type: entity
+    entity: sensor.speckstein_ofen_status
+    name: "Aktueller Betriebsstatus"
+    icon: mdi:fireplace
+
+  # 2. Haupt-Anzeige: Speicherladezustand (Gauge) & Energie
+  - type: horizontal-stack
+    cards:
+      - type: gauge
+        entity: sensor.speckstein_speicherladung
+        name: "Wärmespeicher"
+        unit: "%"
+        needle: true
+        min: 0
+        max: 100
+        severity:
+          green: 50
+          yellow: 25
+          red: 85
+
+      - type: gauge
+        entity: sensor.speckstein_gespeicherte_energie
+        name: "Gespeicherte Energie"
+        unit: "kWh"
+        needle: true
+        min: 0
+        max: 16
+        severity:
+          green: 7
+          yellow: 3
+          red: 12
+
+  # 3. Die beiden Live-Temperaturen im Vergleich
+  - type: glance
+    title: "Live-Temperaturen"
+    show_state: true
+    show_name: true
+    entities:
+      - entity: sensor.tulikivi_specksteinofen_rauchrohr_temperatur
+        name: "Rauchrohr (Echtzeit)"
+        icon: mdi:fire
+      - entity: sensor.tulikivi_specksteinofen_speckstein_temperatur
+        name: "Speckstein (Speicher)"
+        icon: mdi:radiator
+      - entity: sensor.speckstein_restwaerme_stunden
+        name: "Restwärme ca."
+        icon: mdi:timer-sand
+
+  # 4. 24-Stunden Temperaturverlauf (Phasenverschiebung)
+  - type: history-graph
+    title: "24h Abbrand & Wärme-Phasenverschiebung"
+    hours_to_show: 24
+    refresh_interval: 10
+    entities:
+      - entity: sensor.tulikivi_specksteinofen_rauchrohr_temperatur
+        name: "Rauchrohr"
+      - entity: sensor.tulikivi_specksteinofen_speckstein_temperatur
+        name: "Speckstein Außen"
+
+  # 5. Einstellungen & Lern-Modus (Aufklappbar oder als Entities)
+  - type: entities
+    title: "Speicherofen Parameter & Kalibrierung"
+    show_header_toggle: false
+    entities:
+      - entity: input_number.speckstein_masse
+        name: "Ofenmasse"
+      - entity: input_number.speckstein_max_temp
+        name: "100% Temperatur-Grenze (Gelernt)"
+      - entity: input_number.speckstein_min_temp
+        name: "Raumtemperatur (0% Grenze)"
+      - entity: input_boolean.speckstein_auto_learn
+        name: "Höchstwert automatisch anlernen"

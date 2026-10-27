@@ -1,0 +1,195 @@
+# ==============================================================================
+# Home Assistant Package: Tulikivi Specksteinofen Überwachung & Dashboard
+# Berechnet Speicherladung (%), Energie (kWh), Betriebsstatus & Klappen-Alarm
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Konfigurierbare Parameter & Helfer
+# ------------------------------------------------------------------------------
+input_number:
+  speckstein_masse:
+    name: "Speichermasse des Ofens"
+    min: 200
+    max: 3000
+    step: 50
+    initial: 1000
+    unit_of_measurement: "kg"
+    icon: "mdi:weight-kilogram"
+
+  speckstein_max_temp:
+    name: "Maximale Speichertemperatur (100%)"
+    min: 40
+    max: 110
+    step: 1
+    initial: 70
+    unit_of_measurement: "°C"
+    icon: "mdi:thermometer-high"
+
+  speckstein_min_temp:
+    name: "Basis-Raumtemperatur (0%)"
+    min: 15
+    max: 30
+    step: 1
+    initial: 20
+    unit_of_measurement: "°C"
+    icon: "mdi:thermometer-low"
+
+input_boolean:
+  speckstein_auto_learn:
+    name: "Maximaltemperatur automatisch anlernen"
+    initial: true
+    icon: "mdi:school"
+
+# ------------------------------------------------------------------------------
+# 2. Berechnete Template-Sensoren
+# ------------------------------------------------------------------------------
+template:
+  - sensor:
+      # Ladezustand des Speicherofens in Prozent (0 - 100%)
+      - name: "Speckstein Speicherladung"
+        unique_id: speckstein_speicherladung_prozent
+        unit_of_measurement: "%"
+        state_class: measurement
+        icon: >
+          {% set lade = states('sensor.speckstein_speicherladung') | float(0) %}
+          {% if lade >= 90 %} mdi:battery-charging-100
+          {% elif lade >= 75 %} mdi:battery-charging-80
+          {% elif lade >= 50 %} mdi:battery-charging-60
+          {% elif lade >= 25 %} mdi:battery-charging-30
+          {% else %} mdi:battery-charging-outline
+          {% endif %}
+        state: >
+          {% set t_stein = states('sensor.tulikivi_specksteinofen_speckstein_temperatur') | float(20) %}
+          {% set t_min = states('input_number.speckstein_min_temp') | float(20) %}
+          {% set t_max = states('input_number.speckstein_max_temp') | float(70) %}
+          {% if t_max > t_min %}
+            {% set pct = ((t_stein - t_min) / (t_max - t_min)) * 100 %}
+            {{ [0, [100, pct | round(0)] | min] | max }}
+          {% else %}
+            0
+          {% endif %}
+
+      # Gespeicherte thermische Energie in kWh (Q = m * c * delta_T)
+      # Spezifische Wärmekapazität von Speckstein: ca. 0.98 kJ/(kg*K) = 0.0002722 kWh/(kg*K)
+      - name: "Speckstein Gespeicherte Wärme"
+        unique_id: speckstein_gespeicherte_energie_kwh
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        icon: "mdi:fire-circle"
+        state: >
+          {% set t_stein = states('sensor.tulikivi_specksteinofen_speckstein_temperatur') | float(20) %}
+          {% set t_min = states('input_number.speckstein_min_temp') | float(20) %}
+          {% set masse = states('input_number.speckstein_masse') | float(1000) %}
+          {% set delta_t = [0, t_stein - t_min] | max %}
+          {% set kwh = masse * 0.0002722 * delta_t %}
+          {{ kwh | round(1) }}
+
+      # Automatische Zustandserkennung des Ofens
+      - name: "Speckstein Ofen-Status"
+        unique_id: speckstein_ofen_betriebsstatus
+        icon: >
+          {% set st = states('sensor.speckstein_ofen_status') %}
+          {% if 'Abbrand' in st %} mdi:fire
+          {% elif 'Glut' in st %} mdi:campfire
+          {% elif 'Anheizen' in st %} mdi:weather-sunset-up
+          {% elif 'Wärme' in st %} mdi:radiator
+          {% else %} mdi:power-off
+          {% endif %}
+        state: >
+          {% set t_rauch = states('sensor.tulikivi_specksteinofen_rauchrohr_temperatur') | float(0) %}
+          {% set t_stein = states('sensor.tulikivi_specksteinofen_speckstein_temperatur') | float(20) %}
+          {% set t_min = states('input_number.speckstein_min_temp') | float(20) %}
+          
+          {% if t_rauch >= 170 %}
+            Voller Abbrand
+          {% elif t_rauch >= 80 and t_rauch < 170 and (t_stein < (t_min + 15)) %}
+            Anheizen
+          {% elif t_rauch >= 70 and t_rauch < 150 and (t_stein > (t_min + 10)) %}
+            Glutphase (Klappe schließen!)
+          {% elif t_stein > (t_min + 3) %}
+            Wärmeabgabe aktiv
+          {% else %}
+            Kalt / Aus
+          {% endif %}
+
+      # Geschätzte verbleibende Wärmeabgabedauer in Stunden
+      # Ein 1000kg Specksteinofen kühlt im Schnitt mit ca. 2.2 °C pro Stunde ab
+      - name: "Speckstein Restwärmedauer"
+        unique_id: speckstein_restwaerme_stunden
+        unit_of_measurement: "h"
+        icon: "mdi:timer-sand"
+        state: >
+          {% set t_stein = states('sensor.tulikivi_specksteinofen_speckstein_temperatur') | float(20) %}
+          {% set t_min = states('input_number.speckstein_min_temp') | float(20) %}
+          {% set delta_t = [0, t_stein - t_min] | max %}
+          {% set stunden = delta_t / 2.2 %}
+          {{ stunden | round(1) }}
+
+# ------------------------------------------------------------------------------
+# 3. Automationen: Lernfunktion & Klappen-Alarm
+# ------------------------------------------------------------------------------
+automation:
+  # 1. Automatisches Lernen des 100%-Speicher-Peaks
+  - id: speckstein_auto_learn_peak
+    alias: "Specksteinofen: Maximaltemperatur automatisch anlernen"
+    description: "Speichert automatisch den Höchstwert der Steintemperatur als 100% Marke."
+    trigger:
+      - platform: state
+        entity_id: sensor.tulikivi_specksteinofen_speckstein_temperatur
+    condition:
+      - condition: state
+        entity_id: input_boolean.speckstein_auto_learn
+        state: "on"
+      - condition: template
+        value_template: >
+          {{ trigger.to_state.state | float(0) > states('input_number.speckstein_max_temp') | float(70) }}
+    action:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.speckstein_max_temp
+        data:
+          value: "{{ trigger.to_state.state | float | round(0) }}"
+      - service: persistent_notification.create
+        data:
+          title: "🪵 Neuer Speicher-Höchstwert gelernt"
+          message: >
+            Der Specksteinofen hat einen neuen Höchstwert von {{ trigger.to_state.state }} °C erreicht!
+            Die 100%-Marke wurde automatisch angepasst.
+
+  # 2. WICHTIGE BENACHRICHTIGUNG: Glutphase erreicht -> Klappe schließen!
+  - id: speckstein_glutphase_klappe_schliessen
+    alias: "Specksteinofen: Glutphase erreicht - Klappe schließen!"
+    description: "Benachrichtigt, wenn das Feuer durch ist und die Zuluftklappe geschlossen werden sollte."
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.tulikivi_specksteinofen_rauchrohr_temperatur
+        below: 130
+        for:
+          minutes: 3
+    condition:
+      # Nur auslösen, wenn der Stein warm ist (also vorher geheizt wurde)
+      - condition: numeric_state
+        entity_id: sensor.tulikivi_specksteinofen_speckstein_temperatur
+        above: 30
+      # Verhindert Fehlalarme bei kaltem Ofen
+      - condition: template
+        value_template: "{{ states('sensor.speckstein_ofen_status') == 'Glutphase (Klappe schließen!)' }}"
+    action:
+      - service: persistent_notification.create
+        data:
+          title: "🪵 Luftklappe jetzt schließen!"
+          message: "Das Feuer ist heruntergebrannt (Glutphase). Schließe jetzt die Zuluft- und Drosselklappe, damit die Wärme im Speckstein gespeichert bleibt!"
+
+  # 3. Sicherheitswarnung bei Überhitzung des Rauchrohrs
+  - id: speckstein_ueberhitzung_warnung
+    alias: "Specksteinofen: Warnung Rauchrohr Überhitzung"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.tulikivi_specksteinofen_rauchrohr_temperatur
+        above: 380
+    action:
+      - service: persistent_notification.create
+        data:
+          title: "⚠️ ACHTUNG: Rauchrohr überhitzt!"
+          message: "Die Rauchrohrtemperatur liegt bei über 380 °C! Bitte Zuluft drosseln und keinen Brennstoff nachlegen."

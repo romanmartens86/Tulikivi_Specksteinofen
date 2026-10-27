@@ -1,0 +1,88 @@
+# 🪵 Tulikivi Specksteinofen Dashboard & Überwachung für Home Assistant
+
+Intelligente Überwachung und Visualisierung für einen **Tulikivi Specksteinofen (ca. 1.000 kg Speichermasse)** mit einem **ESP32** und zwei **MAX6675 Thermoelement-Sensoren**.
+
+---
+
+## 🌟 Hauptfunktionen
+
+- 🔥 **Rauchrohr-Echtzeitüberwachung:** Erkennt sekundenschnell das Anzünden, den Vollbrand und das Verlöschen des Feuers.
+- 🧱 **Speckstein-Speicherladung (0–100%):** Misst die verzögerte Wärmeaufnahme des Steins (Höhepunkt nach 4–6 Stunden).
+- ⚡ **Echte Energieberechnung (in kWh):** Berechnet die thermisch gespeicherte Energie anhand der 1.000 kg Specksteinmasse ($Q = m \cdot c \cdot \Delta T$).
+- 🧠 **Selbstlernende 100%-Kalibrierung:** Der Peak-Detektor merkt sich nach dem ersten Abbrand automatisch den Maximalwert des Steins und passt die 100%-Skala dynamisch an.
+- 🔔 **Intelligenter Klappen-Alarm (Glutphase):** Schickt eine Benachrichtigung aufs Smartphone, sobald die Flammen erloschen sind und nur noch Glut da ist: **„Luftklappe JETZT schließen!“** (verhindert, dass die gespeicherte Wärme durch den Schornstein abgesaugt wird).
+- ⏳ **Restwärme-Prognose:** Schätzt ab, wie viele Stunden der Ofen noch spürbar Wärme an den Wohnraum abgibt.
+- 📊 **Fertiges Lovelace Dashboard:** Wunderschöne Balken, Tachos, Kurven und Status-Badges für Home Assistant.
+
+---
+
+## 🔌 Hardware & Pinbelegung
+
+Verwendet wird ein **ESP32 DevKitC V4** mit **zwei MAX6675-Modulen**:
+
+| MAX6675 Pin | Sensor 1: Rauchrohr | Sensor 2: Speckstein Außen | ESP32 DevKitC V4 Pin |
+|:---|:---|:---|:---|
+| **VCC** | VCC | VCC | **3V3** *(gemeinsam)* |
+| **GND** | GND | GND | **GND** *(gemeinsam)* |
+| **SCK** *(Clock)* | SCK | SCK | **GPIO 18** *(gemeinsam)* |
+| **SO** *(Data Out)*| SO | SO | **GPIO 19** *(gemeinsam)* |
+| **CS** *(Chip Select)* | **CS** | — | **GPIO 5** *(nur Sensor 1)* |
+| **CS** *(Chip Select)* | — | **CS** | **GPIO 4** *(nur Sensor 2)* |
+
+---
+
+## 🚀 Schritt-für-Schritt Installation
+
+### Schritt 1: ESP32 mit ESPHome flashen
+1. Öffne die Datei [`esphome/specksteinofen.yaml`](esphome/specksteinofen.yaml).
+2. Trage dein WLAN (`ssid` und `password`) ein.
+3. Flashen:
+   - Entweder über das **ESPHome Add-On** in Home Assistant (Neues Gerät ➔ Code einfügen ➔ Installieren).
+   - Oder direkt am PC per USB über [web.esphome.io](https://web.esphome.io).
+4. Sobald der ESP32 im WLAN ist, erkennt Home Assistant das Gerät automatisch als **„Tulikivi Specksteinofen“** mit den beiden Entitäten:
+   - `sensor.tulikivi_specksteinofen_rauchrohr_temperatur`
+   - `sensor.tulikivi_specksteinofen_speckstein_temperatur`
+
+---
+
+### Schritt 2: Home Assistant Package aktivieren
+Das mitgelieferte Package bündelt alle mathematischen Berechnungen, Sensoren, Schalter und Automationen in einer Datei.
+
+1. Stelle sicher, dass in deiner Home Assistant `configuration.yaml` Packages aktiviert sind:
+   ```yaml
+   homeassistant:
+     packages: !include_dir_named packages
+   ```
+2. Kopiere die Datei [`homeassistant/packages/specksteinofen.yaml`](homeassistant/packages/specksteinofen.yaml) in deinen Home Assistant Ordner `config/packages/`.
+3. Gehe in Home Assistant auf **Entwicklerwerkzeuge ➔ YAML ➔ „YAML-Konfiguration neu laden“**.
+
+---
+
+### Schritt 3: Dashboard-Karte hinzufügen
+1. Öffne dein Home Assistant Dashboard.
+2. Klicke oben rechts auf **Bearbeiten ➔ Karte hinzufügen ➔ Manuell (Code)**.
+3. Kopiere den gesamten Inhalt aus [`homeassistant/dashboard/specksteinofen_ui.yaml`](homeassistant/dashboard/specksteinofen_ui.yaml) hinein und klicke auf **Speichern**.
+
+---
+
+## 🧮 Physikalische Berechnung
+
+Speckstein hat eine spezifische Wärmekapazität von $c \approx 0{,}98\text{ kJ}/(\text{kg}\cdot\text{K}) \approx 0{,}272\text{ Wh}/(\text{kg}\cdot\text{K})$.
+
+Bei einer Ofenmasse von **1.000 kg**:
+$$Q = 1000\text{ kg} \times 0{,}0002722 \times (T_{\text{Stein}} - T_{\text{Raum}})$$
+
+- **Beispiel:**  
+  Raumtemperatur = 20 °C  
+  Speckstein maximal erhitzt = 70 °C ($\Delta T = 50\text{ K}$)  
+  $$\text{Gespeicherte Energie} = 1000 \times 0{,}0002722 \times 50 \approx \mathbf{13{,}6\text{ kWh}}$$
+
+---
+
+## ⚙️ Selbstlernende Kalibrierung & Anpassung
+
+Über die Dashboard-Karten kannst du jederzeit folgende Parameter anpassen:
+- **Speichermasse (kg):** Voreingestellt auf 1.000 kg.
+- **Raumtemperatur (0% Grenze):** Standard 20 °C.
+- **100% Temperatur-Grenze (Gelernt):** Standard 70 °C.
+- **Automatisches Anlernen (Schalter):** Ist dieser Schalter aktiv, registriert eine Automation automatisch neue Temperaturrekorde deines Specksteins und passt die 100%-Marke nach oben an.
