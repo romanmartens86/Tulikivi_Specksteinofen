@@ -1,5 +1,14 @@
 # ==============================================================================
 # Lovelace Dashboard-Karte: Tulikivi Specksteinofen
+# 
+# VARIANTE 1: DIREKT IM KARTEN-PICKER (Empfohlen!)
+# Klicke im Dashboard einfach auf "Karte hinzufügen" -> "Tulikivi Specksteinofen" auswählen!
+# Im YAML-Modus entspricht das einfach:
+# ------------------------------------------------------------------------------
+# type: custom:tulikivi-specksteinofen-card
+# ------------------------------------------------------------------------------
+#
+# VARIANTE 2: MANUELLER STACK (Aus Einzel-Karten)
 # Einfügen über: Dashboard bearbeiten -> Karte hinzufügen -> Ganz unten "Manuell"
 # ==============================================================================
 
