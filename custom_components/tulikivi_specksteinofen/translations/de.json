@@ -23,6 +23,8 @@
         "title": "Tulikivi Parameter anpassen",
         "description": "Passe Sensoren, Ofengewicht oder Temperaturgrenzen an.",
         "data": {
+          "flue_sensor": "Rauchrohr-Temperatursensor (schnell)",
+          "stone_sensor": "Speckstein-Temperatursensor (Speicher)",
           "room_sensor": "Raumtemperatur-Sensor (optional, Entität)",
           "mass": "Speichermasse des Ofens in kg",
           "room_temp": "Feste Basis-Raumtemperatur (°C, wenn kein Sensor gewählt)",

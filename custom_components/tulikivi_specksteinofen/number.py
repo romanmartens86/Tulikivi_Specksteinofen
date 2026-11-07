@@ -59,3 +59,4 @@ class TulikiviMaxTempNumber(NumberEntity):
     async def async_set_native_value(self, value: float) -> None:
         """Update maximum temperature."""
         await self.coordinator.async_set_max_temp(value)
+

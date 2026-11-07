@@ -149,3 +149,4 @@ class TulikiviDataCoordinator:
     def _notify_listeners(self) -> None:
         for listener in self.listeners:
             listener()
+

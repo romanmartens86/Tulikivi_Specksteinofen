@@ -57,3 +57,4 @@ class TulikiviAutoLearnSwitch(SwitchEntity):
     async def async_turn_off(self, **kwargs) -> None:
         """Turn auto-learn off (freezing the peak temperature)."""
         await self.coordinator.async_set_auto_learn(False)
+

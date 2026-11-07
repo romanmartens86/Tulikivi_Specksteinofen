@@ -96,6 +96,18 @@ class TulikiviOptionsFlowHandler(config_entries.OptionsFlow):
         current = self.config_entry.data
 
         options_schema = {
+            vol.Required(
+                CONF_FLUE_SENSOR,
+                description={"suggested_value": current.get(CONF_FLUE_SENSOR)},
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="sensor")
+            ),
+            vol.Required(
+                CONF_STONE_SENSOR,
+                description={"suggested_value": current.get(CONF_STONE_SENSOR)},
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="sensor")
+            ),
             vol.Optional(
                 CONF_ROOM_SENSOR,
                 description={"suggested_value": current.get(CONF_ROOM_SENSOR)},

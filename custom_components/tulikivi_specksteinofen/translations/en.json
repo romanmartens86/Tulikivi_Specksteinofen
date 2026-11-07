@@ -23,6 +23,8 @@
         "title": "Adjust Tulikivi parameters",
         "description": "Adjust sensors, stove weight or temperature thresholds.",
         "data": {
+          "flue_sensor": "Flue pipe temperature sensor (fast)",
+          "stone_sensor": "Soapstone temperature sensor (storage)",
           "room_sensor": "Room temperature sensor (optional)",
           "mass": "Thermal storage mass in kg",
           "room_temp": "Fixed baseline room temp (°C, if no sensor chosen)",

@@ -48,7 +48,7 @@ sensor:
   - platform: max6675
     name: "Rauchrohr Temperatur"
     id: rauchrohr_temp
-    cs_pin: GPIO5
+    cs_pin: GPIO4
     update_interval: 2s
     unit_of_measurement: "°C"
     accuracy_decimals: 0
@@ -62,7 +62,7 @@ sensor:
   - platform: max6675
     name: "Speckstein Temperatur"
     id: speckstein_temp
-    cs_pin: GPIO4
+    cs_pin: GPIO5
     update_interval: 2s
     unit_of_measurement: "°C"
     accuracy_decimals: 0
