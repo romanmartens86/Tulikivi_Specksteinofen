@@ -2,17 +2,17 @@
   "config": {
     "step": {
       "user": {
-        "title": "Configure Tulikivi Soapstone Stove",
-        "description": "Select temperature sensors and enter the thermal mass of your soapstone stove.",
+        "title": "Set up Tulikivi Soapstone Stove",
+        "description": "Select temperature sensors and enter the thermal storage mass of your stove.",
         "data": {
           "name": "Stove Name",
-          "flue_sensor": "Flue Pipe Temperature Sensor (Fast)",
-          "stone_sensor": "Soapstone Surface Temperature Sensor (Storage)",
-          "room_sensor": "Room Temperature Sensor (Optional entity)",
-          "mass": "Thermal mass of the stove in kg (e.g. 1000 or 2600)",
-          "room_temp": "Fixed base room temperature (°C, fallback if no sensor)",
-          "max_temp": "Max temperature for 100% charge (°C)",
-          "auto_learn": "Automatically learn new peak temperature"
+          "flue_sensor": "Flue pipe temperature sensor (fast)",
+          "stone_sensor": "Soapstone temperature sensor (storage)",
+          "room_sensor": "Room temperature sensor (optional)",
+          "mass": "Thermal storage mass in kg (e.g. 1000 or 2600)",
+          "room_temp": "Fixed baseline room temp (°C, if no sensor chosen)",
+          "max_temp": "Maximum stone temperature for 100% capacity (°C)",
+          "auto_learn": "Automatically learn new peak temperatures"
         }
       }
     }
@@ -20,15 +20,27 @@
   "options": {
     "step": {
       "init": {
-        "title": "Adjust Tulikivi Parameters",
-        "description": "Adjust sensors, stove mass or temperature boundaries.",
+        "title": "Adjust Tulikivi parameters",
+        "description": "Adjust sensors, stove weight or temperature thresholds.",
         "data": {
-          "room_sensor": "Room Temperature Sensor (Optional entity)",
-          "mass": "Thermal mass of the stove in kg",
-          "room_temp": "Fixed base room temperature (°C, fallback if no sensor)",
-          "max_temp": "Max temperature for 100% (°C)",
-          "auto_learn": "Automatically learn peak temperature"
+          "room_sensor": "Room temperature sensor (optional)",
+          "mass": "Thermal storage mass in kg",
+          "room_temp": "Fixed baseline room temp (°C, if no sensor chosen)",
+          "max_temp": "Maximum stone temperature for 100% (°C)",
+          "auto_learn": "Automatically learn new peak temperatures"
         }
+      }
+    }
+  },
+  "entity": {
+    "switch": {
+      "auto_learn": {
+        "name": "Auto-Learn Peak Temperature"
+      }
+    },
+    "number": {
+      "max_temp": {
+        "name": "Maximum Storage Temperature"
       }
     }
   }

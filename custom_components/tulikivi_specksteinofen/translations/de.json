@@ -31,5 +31,17 @@
         }
       }
     }
+  },
+  "entity": {
+    "switch": {
+      "auto_learn": {
+        "name": "Automatisches Lernen (Auto-Learn)"
+      }
+    },
+    "number": {
+      "max_temp": {
+        "name": "Maximale Speichertemperatur"
+      }
+    }
   }
 }

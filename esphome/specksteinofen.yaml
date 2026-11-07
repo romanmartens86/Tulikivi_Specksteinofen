@@ -20,8 +20,8 @@ ota:
 
 # WLAN-Konfiguration
 wifi:
-  ssid: "!secret wifi_ssid"
-  password: "!secret wifi_password"
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
 
   # Notfall-Hotspot falls WLAN nicht erreichbar ist
   ap:
@@ -32,7 +32,7 @@ captive_portal:
 
 # Logger für Fehlerdiagnose
 logger:
-  level: INFO
+  level: DEBUG
 
 # Status-LED auf dem ESP32 DevKitC V4 (blaue LED auf GPIO 2)
 status_led:
