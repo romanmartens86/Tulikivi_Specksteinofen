@@ -1,87 +1,139 @@
 # ==============================================================================
-# Lovelace Dashboard: Tulikivi Specksteinofen
-# Du kannst diesen YAML-Block direkt als Ansicht (View) oder als vertikalen Stapel
-# in dein Home Assistant Dashboard einfügen.
+# Lovelace Dashboard-Karte: Tulikivi Specksteinofen
+# Einfügen über: Dashboard bearbeiten -> Karte hinzufügen -> Ganz unten "Manuell"
 # ==============================================================================
 
 type: vertical-stack
-title: "🪵 Tulikivi Specksteinofen"
 cards:
-  # 1. Großer Status-Header
-  - type: entity
-    entity: sensor.speckstein_ofen_status
-    name: "Aktueller Betriebsstatus"
-    icon: mdi:fireplace
+  # 1. Dynamischer Status-Header mit Klappen-Warnung & Farbwechsel
+  - type: custom:mushroom-template-card
+    entity: sensor.tulikivi_specksteinofen_betriebsstatus
+    primary: >-
+      {{ states('sensor.tulikivi_specksteinofen_betriebsstatus') }} ·
+      {{ states('sensor.tulikivi_specksteinofen_speicherladung') | int(0) }} % geladen
+    secondary: >-
+      {% set st = states('sensor.tulikivi_specksteinofen_betriebsstatus') %}
+      {% if 'Glutphase' in st %}
+      ⚠️ Jetzt Luftklappe schließen, um Wärme im Stein zu halten!
+      {% else %}
+      Rauchgas: {{ states('sensor.tulikivi_specksteinofen_rauchrohr_temperatur') | float(0) | round(1) }} °C ·
+      Stein: {{ states('sensor.tulikivi_specksteinofen_speckstein_temperatur') | float(0) | round(1) }} °C ·
+      Raum: {{ states('sensor.netatmo_wohnzimmer_temperatur') | float(0) | round(1) }} °C
+      {% endif %}
+    icon: >-
+      {% set st = states('sensor.tulikivi_specksteinofen_betriebsstatus') %}
+      {% if st == 'Voller Abbrand' %}mdi:fire
+      {% elif st == 'Anheizen' %}mdi:fire-alert
+      {% elif 'Glutphase' in st %}mdi:alert-decagram
+      {% elif 'Wärmeabgabe' in st %}mdi:radiator
+      {% else %}mdi:fireplace-off{% endif %}
+    icon_color: >-
+      {% set st = states('sensor.tulikivi_specksteinofen_betriebsstatus') %}
+      {% if st == 'Voller Abbrand' %}deep-orange
+      {% elif st == 'Anheizen' %}amber
+      {% elif 'Glutphase' in st %}red
+      {% elif 'Wärmeabgabe' in st %}orange
+      {% else %}grey{% endif %}
 
-  # 2. Haupt-Anzeige: Speicherladezustand (Gauge) & Energie
+  # 2. Tachos für Speicherladung (auch > 100%) & Gespeicherte Wärmemenge (kWh)
   - type: horizontal-stack
     cards:
       - type: gauge
-        entity: sensor.speckstein_speicherladung
-        name: "Wärmespeicher"
+        entity: sensor.tulikivi_specksteinofen_speicherladung
+        name: Speicherladung
         unit: "%"
         needle: true
         min: 0
-        max: 100
-        severity:
-          green: 50
-          yellow: 25
-          red: 85
+        max: 120
+        segments:
+          - from: 0
+            color: "#546e7a"
+          - from: 20
+            color: "#42a5f5"
+          - from: 45
+            color: "#66bb6a"
+          - from: 80
+            color: "#ffa726"
+          - from: 100
+            color: "#ef5350"
 
       - type: gauge
-        entity: sensor.speckstein_gespeicherte_energie
-        name: "Gespeicherte Energie"
-        unit: "kWh"
+        entity: sensor.tulikivi_specksteinofen_gespeicherte_warme
+        name: Wärmemenge
+        unit: kWh
         needle: true
         min: 0
-        max: 50
-        severity:
-          green: 15
-          yellow: 8
-          red: 35
+        max: 15
+        segments:
+          - from: 0
+            color: "#546e7a"
+          - from: 2
+            color: "#42a5f5"
+          - from: 5
+            color: "#66bb6a"
+          - from: 10
+            color: "#ffa726"
+          - from: 12
+            color: "#ef5350"
 
-  # 3. Live-Temperaturen & Leistungswerte
-  - type: glance
-    title: "Live-Messwerte & Kapazität"
-    show_state: true
-    show_name: true
-    entities:
-      - entity: sensor.tulikivi_specksteinofen_rauchrohr_temperatur
-        name: "Rauchrohr"
+  # 3. Live-Temperaturen (Rauchgas & Speckstein)
+  - type: horizontal-stack
+    cards:
+      - type: tile
+        entity: sensor.tulikivi_specksteinofen_rauchrohr_temperatur
+        name: Rauchgas
         icon: mdi:fire
-      - entity: sensor.tulikivi_specksteinofen_speckstein_temperatur
-        name: "Speckstein"
+        color: deep-orange
+      - type: tile
+        entity: sensor.tulikivi_specksteinofen_speckstein_temperatur
+        name: Speckstein
         icon: mdi:radiator
-      - entity: sensor.speckstein_max_kapazitaet_kwh
-        name: "Max. Kapazität"
-        icon: mdi:battery-high
-      - entity: sensor.speckstein_restwaerme_stunden
-        name: "Restwärme ca."
-        icon: mdi:timer-sand
+        color: orange
 
-  # 4. 24-Stunden Temperaturverlauf (Phasenverschiebung)
-  - type: history-graph
-    title: "24h Abbrand & Wärme-Phasenverschiebung"
+  # 4. Restwärme-Prognose & 100%-Kapazitätsinfo
+  - type: custom:mushroom-template-card
+    entity: sensor.tulikivi_specksteinofen_restwarmedauer
+    primary: >-
+      Restwärme: ca. {{ states('sensor.tulikivi_specksteinofen_restwarmedauer') | float(0) | round(1) }} Std.
+      ({{ states('sensor.tulikivi_specksteinofen_gespeicherte_warme') | float(0) | round(2) }} kWh)
+    secondary: >-
+      100%-Kapazität: {{ states('sensor.tulikivi_specksteinofen_max_speicherkapazitat') | float(0) | round(2) }} kWh
+      (bei {{ states('number.tulikivi_specksteinofen_maximale_speichertemperatur') | float(65) | round(1) }} °C Stein)
+    icon: mdi:timer-sand
+    icon_color: teal
+
+  # 5. 24-Stunden Verlauf mit 2 Y-Achsen (für perfekte Sichtbarkeit der Phasenverschiebung)
+  - type: custom:mini-graph-card
+    name: Abbrand & Phasenverschiebung (24h)
+    icon: mdi:chart-bell-curve-cumulative
     hours_to_show: 24
-    refresh_interval: 10
+    points_per_hour: 4
+    decimals: 1
+    line_width: 3
     entities:
       - entity: sensor.tulikivi_specksteinofen_rauchrohr_temperatur
-        name: "Rauchrohr"
+        name: Rauchgas (°C)
+        color: "#ff5722"
       - entity: sensor.tulikivi_specksteinofen_speckstein_temperatur
-        name: "Speckstein Außen"
+        name: Speckstein (°C)
+        color: "#ffa726"
+        y_axis: secondary
+    show:
+      labels: true
+      labels_secondary: true
+      legend: true
+      icon: true
 
-  # 5. Ofen-Konfiguration (Hier Gewicht wie 1000kg oder 2600kg einstellen!)
-  - type: entities
-    title: "⚙️ Ofen-Konfiguration & Parameter"
-    show_header_toggle: false
-    entities:
-      - entity: input_number.speckstein_masse
-        name: "Ofen-Gewicht (z.B. 1000 oder 2600 kg)"
-      - entity: input_text.speckstein_raum_sensor_entity
-        name: "Raumtemperatur Sensor-Entität (z.B. sensor.wohnzimmer_temperatur)"
-      - entity: input_number.speckstein_min_temp
-        name: "Feste Basis-Raumtemperatur (Fallback)"
-      - entity: input_number.speckstein_max_temp
-        name: "100% Temperatur-Grenze (Gelernt)"
-      - entity: input_boolean.speckstein_auto_learn
-        name: "Höchstwert automatisch anlernen"
+  # 6. Kalibrierung & Auto-Learn Steuerung
+  - type: horizontal-stack
+    cards:
+      - type: tile
+        entity: switch.tulikivi_specksteinofen_automatisches_lernen_auto_learn
+        name: Auto-Learn
+        icon: mdi:school
+        color: amber
+      - type: tile
+        entity: number.tulikivi_specksteinofen_maximale_speichertemperatur
+        name: 100% Max-Temp.
+        icon: mdi:thermometer-chevron-up
+        color: red
